@@ -451,19 +451,30 @@ if(forecastCronJobActive) {
   const handleSendGetAccount = async () => {
     try {
       const accountinfo: any = await sendGetAccount(password, selectedNetwork);
+  
+      console.log("Received account info:", accountinfo); // Debugging log
+  
+      if (!accountinfo || !accountinfo.accountInfo) {
+        throw new Error("Invalid account info received");
+      }
+  
       const { accountInfo } = accountinfo;
       const { address, bal } = accountInfo;
+  
+      if (!address || bal === undefined) {
+        throw new Error("Missing address or balance in account info");
+      }
+  
       setAddress(address);
       setBalance(bal);
-      const hashedPassword = SHA256(inputPassword).toString();
       setShowCreateAccountCard(false);
       setIsAccount(true);
     } catch (error) {
-      console.error(error);
+      console.error("Error in handleSendGetAccount:", error);
       dispatch({ type: MetamaskActions.SetError, payload: error });
     }
   };
-
+  
   const handleLoginAccount = async () => {
     try {
       const hashedPassword = SHA256(inputPassword).toString();

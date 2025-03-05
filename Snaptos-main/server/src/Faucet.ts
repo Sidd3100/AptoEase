@@ -35,7 +35,7 @@ export async function fundMe(request: Request) {
     // Fund the account with 100 APT (100_000_000 Octas)
     const txn = await aptos.fundAccount({
       accountAddress: address,
-      amount: 100_000_000, // 100 APT
+      amount: 100000000, // 100 APT
     });
     console.log("Transaction response:", txn);
     return txn;

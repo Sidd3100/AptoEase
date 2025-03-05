@@ -6,7 +6,7 @@ export async function genTxn(reqBody: {
   amount: number;
   addr: AccountAddress;
 }) {
-  const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET })); // Change network if needed
+  const aptos = new Aptos(new AptosConfig({ network: Network.DEVNET })); // Change network if needed
   const { to, amount, addr } = reqBody;
 
   // Convert recipient address to AccountAddress type
@@ -18,7 +18,7 @@ export async function genTxn(reqBody: {
     data: {
       function: '0x1::coin::transfer',
       typeArguments: ['0x1::aptos_coin::AptosCoin'],
-      functionArguments: [recipient, [amount]],
+      functionArguments: [to, amount],
     },
   });
 

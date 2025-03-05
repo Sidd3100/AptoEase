@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, Network, GetAccountCoinsDataResponse } from "@aptos-labs/ts-sdk";
 
 interface Request {
   address: string;
@@ -14,7 +14,8 @@ interface CoinStore {
 }
 
 export default async function checkBalance(request: Request) {
-  const { address, network } = request;
+  const requestBody: Request = request;
+  const network = requestBody.network;
 
   // Validate and determine the network
   let aptosNetwork: Network;
@@ -30,24 +31,11 @@ export default async function checkBalance(request: Request) {
 
   // Create an Aptos client with the latest configuration
   const aptosConfig = new AptosConfig({ network: aptosNetwork });
-  const aptos = new Aptos(aptosConfig);
+    const aptos = new Aptos(aptosConfig);
+    const accountCoinsData: GetAccountCoinsDataResponse = await aptos.getAccountCoinsData({accountAddress: request.address});
+    console.log('this is accountCoinsData', accountCoinsData);
+    console.log({requestBody})
+    console.log('network: ', network)
 
-  // Define the resource type for the Aptos coin store
-  const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
-  const COIN_STORE = `0x1::coin::CoinStore<${APTOS_COIN}>`;
-
-  // Query the account resource for the coin store data
-  const coinStore: CoinStore = await aptos.getAccountResource<CoinStore>({
-    accountAddress: address,
-    resourceType: COIN_STORE,
-  });
-
-  console.log("Coin store data:", coinStore);
-  console.log("Request:", request);
-
-  // Optionally parse the balance to a number for easier use
-  const balance = Number(coinStore.coin.value);
-  console.log("Balance:", balance);
-
-  return coinStore;
+    return accountCoinsData;
 }

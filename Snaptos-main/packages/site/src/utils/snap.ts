@@ -72,19 +72,31 @@ export const sendHello = async () => {
  * @returns The account data returned by the snap.
  */
 export const sendGetAccount = async (password: string, network: string) => {
-  const accountData = await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-      snapId: defaultSnapOrigin,
-      request: {
-        method: 'getAccount',
-        params: { password: SHA256(password).toString(), network },
+  try {
+    const accountData = await window.ethereum.request({
+      method: "wallet_invokeSnap",
+      params: {
+        snapId: defaultSnapOrigin,
+        request: {
+          method: "getAccount",
+          params: { password: SHA256(password).toString(), network },
+        },
       },
-    },
-  });
-  console.log('this is accountData', accountData);
-  return accountData;
+    });
+
+    console.log("sendGetAccount response:", accountData); // Debugging log
+
+    if (!accountData || typeof accountData !== "object") {
+      throw new Error("Invalid account data received from snap");
+    }
+
+    return accountData;
+  } catch (error) {
+    console.error("Error fetching account data:", error);
+    return { error: "Failed to fetch account data" };
+  }
 };
+
 
 export const sendCoin = async (to: string, amount: number, network: string) => {
   const txHash = await window.ethereum.request({

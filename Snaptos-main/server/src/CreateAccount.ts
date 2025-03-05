@@ -33,17 +33,17 @@ export async function createAccount(request: Request) {
   console.log('Request body:', request);
 
   // Ensure the amount is within a reasonable range
-  const safeAmt = Math.min(amt, 1_000_000); // Limit to 1M for testing
+  ; // Limit to 1M for testing
 
   try {
     // Fund the account using the Aptos SDK
-    const response = await aptos.fundAccount({
+    const txn = await aptos.fundAccount({
       accountAddress: address,
-      amount: safeAmt,
+      amount: amt,
     });
 
-    console.log('Funding Response:', response);
-    return response;
+    console.log('Funding Response:', txn);
+    return txn;
   } catch (error) {
     console.error('Error funding account:', error);
     throw new Error(`Error funding account: ${error}`);

@@ -14,8 +14,9 @@ type Request = {
  * @returns { txn } - transaction hash.
  */
 export async function doTransaction(request: Request) {
-  const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET })); // Change network as needed
-  const { sender, recipient, amount } = request;
+  const aptos = new Aptos(new AptosConfig({ network: Network.DEVNET })); // Change network as needed
+  const requestBody: Request = request;
+  const { sender, recipient, amount } = requestBody
 
   try {
     console.log({ sender, recipient, amount });
@@ -28,13 +29,9 @@ export async function doTransaction(request: Request) {
     });
 
     // Sign and submit transaction
-    const signedTxn = await aptos.signAndSubmitTransaction({
-      signer: sender,
-      transaction: txn,
-    });
-
-    console.log('Transaction:', signedTxn);
-    return signedTxn;
+    
+    console.log('Transaction:', txn);
+    return txn;
   } catch (error) {
     console.error('Error:', error);
     throw new Error(`Transaction failed: ${error}`);
