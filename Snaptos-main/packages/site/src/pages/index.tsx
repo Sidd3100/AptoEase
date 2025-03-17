@@ -225,7 +225,14 @@ const Index = () => {
   const [isAccountCreating, setIsAccountCreating] = useState(false);
   const [isAccountLogin, setIsAccountLogin] = useState(false);
   const [open, setOpen] = useState(false);
-  const [txnHistory, setTxnHistory] = useState([]);
+  interface Transaction {
+    version: string;
+    hash: string;
+    events: { data: { amount: number } }[];
+    timestamp: number;
+  }
+
+  const [txnHistory, setTxnHistory] = useState<Transaction[]>([]);
   const [txncCronJobActive, setTxnCronJobActive] = useState(false);
   const [isMainet, setIsMainnet] = useState(false);
   const [valueInUSD, setValueInUSD] = useState(8.335);
@@ -371,19 +378,10 @@ if(forecastCronJobActive) {
   };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const enteredAmount = event.target.value.trim();
-    const parsedAmount = parseFloat(enteredAmount);
-  
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      setSendAmount(undefined); // Ensure undefined if input is invalid
-      setIsNextButtonDisabled(true);
-      return;
-    }
-  
-    setSendAmount(parsedAmount);
-    setIsNextButtonDisabled(parsedAmount > balance);
+    const enteredAmount = event.target.value;
+    setSendAmount(parseFloat(enteredAmount));
+    setIsNextButtonDisabled(Number(enteredAmount) > balance);
   };
-  
 
   const handleConnectClick = async () => {
     try {
@@ -451,30 +449,19 @@ if(forecastCronJobActive) {
   const handleSendGetAccount = async () => {
     try {
       const accountinfo: any = await sendGetAccount(password, selectedNetwork);
-  
-      console.log("Received account info:", accountinfo); // Debugging log
-  
-      if (!accountinfo || !accountinfo.accountInfo) {
-        throw new Error("Invalid account info received");
-      }
-  
       const { accountInfo } = accountinfo;
       const { address, bal } = accountInfo;
-  
-      if (!address || bal === undefined) {
-        throw new Error("Missing address or balance in account info");
-      }
-  
       setAddress(address);
       setBalance(bal);
+      const hashedPassword = SHA256(inputPassword).toString();
       setShowCreateAccountCard(false);
       setIsAccount(true);
     } catch (error) {
-      console.error("Error in handleSendGetAccount:", error);
+      console.error(error);
       dispatch({ type: MetamaskActions.SetError, payload: error });
     }
   };
-  
+
   const handleLoginAccount = async () => {
     try {
       const hashedPassword = SHA256(inputPassword).toString();
@@ -493,22 +480,15 @@ if(forecastCronJobActive) {
 
   const handleCoinTransfer = async () => {
     closeSendModal();
-  
-    if (!recipientAddress || sendAmount === undefined || sendAmount <= 0) {
-      console.error("Invalid transaction details:", { recipientAddress, sendAmount });
-      return;
-    }
-  
     try {
       await sendCoin(recipientAddress, sendAmount, selectedNetwork);
       const updatedBalance = await sendGetBalance(selectedNetwork);
       setBalance(updatedBalance);
     } catch (error) {
-      console.error("Transaction failed:", error);
+      console.error(error);
       dispatch({ type: MetamaskActions.SetError, payload: error });
     }
   };
-  
   useEffect(() => {
     if (!isCreatingAccount) {
       setPassword('');
